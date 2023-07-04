@@ -132,7 +132,7 @@ func (e *Environment) updateHash() {
 	for _, s := range e.global {
 		buf.WriteString(s)
 	}
-	for name, _ := range e.funcMap {
+	for name := range e.funcMap {
 		buf.WriteString(name)
 	}
 
