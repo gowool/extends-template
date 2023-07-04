@@ -56,7 +56,7 @@ func TestChainLoader_Get(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		source, err := loader.Get(nil, s.view)
+		source, err := loader.Get(context.TODO(), s.view)
 
 		if s.isError {
 			assert.Nil(t, source)
@@ -91,7 +91,7 @@ func TestChainLoader_IsFresh(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		isFresh, _ := loader.IsFresh(nil, s.view, 0)
+		isFresh, _ := loader.IsFresh(context.TODO(), s.view, 0)
 
 		assert.Equal(t, s.expected, isFresh)
 	}
@@ -119,7 +119,7 @@ func TestChainLoader_Exists(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		isFresh, _ := loader.Exists(nil, s.view)
+		isFresh, _ := loader.Exists(context.TODO(), s.view)
 
 		assert.Equal(t, s.expected, isFresh)
 	}

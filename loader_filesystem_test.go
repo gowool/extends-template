@@ -1,6 +1,7 @@
 package et_test
 
 import (
+	"context"
 	et "github.com/gowool/extends-template"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -89,7 +90,7 @@ func TestFilesystemLoader_Get(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		source, err := loader.Get(nil, s.view)
+		source, err := loader.Get(context.TODO(), s.view)
 
 		if s.isError {
 			assert.Nil(t, source)
@@ -122,7 +123,7 @@ func TestFilesystemLoader_Exists(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		exists, err := loader.Exists(nil, s.view)
+		exists, err := loader.Exists(context.TODO(), s.view)
 
 		assert.Equal(t, s.expected, exists)
 		if s.isError {
@@ -164,7 +165,7 @@ func TestFilesystemLoader_IsFresh(t *testing.T) {
 	}
 
 	for _, s := range scenarios {
-		isFresh, err := loader.IsFresh(nil, s.view, s.t)
+		isFresh, err := loader.IsFresh(context.TODO(), s.view, s.t)
 
 		assert.Equal(t, s.expected, isFresh)
 		if s.isError {

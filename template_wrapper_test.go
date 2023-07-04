@@ -30,15 +30,15 @@ type wrapLoader struct {
 	t int64
 }
 
-func (l wrapLoader) Get(_ context.Context, name string) (*et.Source, error) {
-	if ok, _ := l.Exists(nil, name); ok {
+func (l wrapLoader) Get(ctx context.Context, name string) (*et.Source, error) {
+	if ok, _ := l.Exists(ctx, name); ok {
 		return &et.Source{Name: name, Code: htmlViews[name]}, nil
 	}
 	return nil, fmt.Errorf("template %s not found", name)
 }
 
-func (l wrapLoader) IsFresh(_ context.Context, name string, t int64) (bool, error) {
-	ok, _ := l.Exists(nil, name)
+func (l wrapLoader) IsFresh(ctx context.Context, name string, t int64) (bool, error) {
+	ok, _ := l.Exists(ctx, name)
 	return ok && l.t < t, nil
 }
 
@@ -70,7 +70,7 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 			et.ReExtends("{{", "}}"),
 			et.ReTemplate("{{", "}}"))
 
-		isFresh := wrapper.IsFresh(nil)
+		isFresh := wrapper.IsFresh(context.TODO())
 
 		assert.Equal(t, s.expected, isFresh)
 	}
@@ -85,7 +85,7 @@ func TestTemplateWrapper_Parse(t *testing.T) {
 		et.ReTemplate("{{", "}}"))
 
 	for range []struct{}{{}, {}} {
-		if err := wrapper.Parse(nil); assert.NoError(t, err) && assert.NotNil(t, wrapper.HTML) {
+		if err := wrapper.Parse(context.TODO()); assert.NoError(t, err) && assert.NotNil(t, wrapper.HTML) {
 			var out bytes.Buffer
 			if err = wrapper.HTML.ExecuteTemplate(&out, name, nil); assert.NoError(t, err) {
 				assert.Equal(t, htmlResult, out.String())

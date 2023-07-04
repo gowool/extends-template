@@ -1,6 +1,7 @@
 package et_test
 
 import (
+	"context"
 	et "github.com/gowool/extends-template"
 	"github.com/stretchr/testify/assert"
 	"html/template"
@@ -54,7 +55,7 @@ func TestEnvironment_Load(t *testing.T) {
 
 	for _, s := range scenarios {
 		for range []struct{}{{}, {}} {
-			w, err := env.Load(nil, s.view)
+			w, err := env.Load(context.TODO(), s.view)
 			if s.isError {
 				assert.Nil(t, w)
 				assert.Error(t, err)
