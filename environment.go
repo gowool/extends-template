@@ -22,6 +22,7 @@ type Environment struct {
 	left        string
 	right       string
 	loader      Loader
+	handlers    []Handler
 	reExtends   *regexp.Regexp
 	reTemplates *regexp.Regexp
 	templates   *sync.Map
@@ -30,8 +31,8 @@ type Environment struct {
 	mu          sync.Mutex
 }
 
-func NewEnvironment(loader Loader) *Environment {
-	e := &Environment{loader: loader}
+func NewEnvironment(loader Loader, handlers ...Handler) *Environment {
+	e := &Environment{loader: loader, handlers: handlers}
 
 	return e.Delims(leftDelim, rightDelim)
 }
@@ -92,6 +93,7 @@ func (e *Environment) NewTemplateWrapper(name string) *TemplateWrapper {
 	return NewTemplateWrapper(
 		e.NewHTMLTemplate(name),
 		e.loader,
+		e.handlers,
 		e.reExtends,
 		e.reTemplates,
 		e.global...,

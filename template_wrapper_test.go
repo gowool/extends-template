@@ -67,6 +67,7 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 		wrapper := et.NewTemplateWrapper(
 			template.New(name),
 			wrapLoader{t: s.t},
+			nil,
 			et.ReExtends("{{", "}}"),
 			et.ReTemplate("{{", "}}"))
 
@@ -81,6 +82,7 @@ func TestTemplateWrapper_Parse(t *testing.T) {
 	wrapper := et.NewTemplateWrapper(
 		template.New(name),
 		wrapLoader{},
+		nil,
 		et.ReExtends("{{", "}}"),
 		et.ReTemplate("{{", "}}"))
 
