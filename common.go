@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	extendsPattern  = `^%s\s*extends\s*"(.*?)"\s*%s`
+	extendsPattern  = `%s\s*extends\s*"(.*?)"\s*%s`
 	templatePattern = `%s\s*template\s*"(.*?)".*?%s`
 )
 
