@@ -3,6 +3,7 @@ package et_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	et "github.com/gowool/extends-template"
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,7 @@ import (
 )
 
 const (
+	htmlGlobal   = `{{define "title_h1"}}<h1>{{.}}</h1>{{end}}`
 	htmlLayout   = `<body>{{block "content" .}}{{end}}</body>`
 	htmlTitle    = `<h1>Title Test</h1>`
 	htmlSubtitle = `<h2>Subtitle Test</h2>`
@@ -20,6 +22,7 @@ const (
 )
 
 var htmlViews = map[string][]byte{
+	"@main/global.html":   []byte(htmlGlobal),
 	"@main/layout.html":   []byte(htmlLayout),
 	"@main/title.html":    []byte(htmlTitle),
 	"@main/subtitle.html": []byte(htmlSubtitle),
@@ -49,6 +52,7 @@ func (l wrapLoader) Exists(_ context.Context, name string) (bool, error) {
 
 func TestTemplateWrapper_IsFresh(t *testing.T) {
 	scenarios := []struct {
+		handlers []et.Handler
 		t        int64
 		expected bool
 	}{
@@ -60,6 +64,15 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 			t:        time.Now().Add(-24 * time.Hour).Unix(),
 			expected: true,
 		},
+		{
+			t:        time.Now().Add(-24 * time.Hour).Unix(),
+			expected: false,
+			handlers: []et.Handler{
+				func(_ context.Context, _ *et.Node, _ string) error {
+					return errors.New("handler error")
+				},
+			},
+		},
 	}
 
 	for _, s := range scenarios {
@@ -67,7 +80,7 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 		wrapper := et.NewTemplateWrapper(
 			template.New(name),
 			wrapLoader{t: s.t},
-			nil,
+			s.handlers,
 			et.ReExtends("{{", "}}"),
 			et.ReTemplate("{{", "}}"))
 
@@ -79,18 +92,49 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 
 func TestTemplateWrapper_Parse(t *testing.T) {
 	name := "@main/view.html"
-	wrapper := et.NewTemplateWrapper(
-		template.New(name),
-		wrapLoader{},
-		nil,
-		et.ReExtends("{{", "}}"),
-		et.ReTemplate("{{", "}}"))
 
-	for range []struct{}{{}, {}} {
-		if err := wrapper.Parse(context.TODO()); assert.NoError(t, err) && assert.NotNil(t, wrapper.HTML) {
-			var out bytes.Buffer
-			if err = wrapper.HTML.ExecuteTemplate(&out, name, nil); assert.NoError(t, err) {
-				assert.Equal(t, htmlResult, out.String())
+	scenarios := []struct {
+		handlers []et.Handler
+		isError  bool
+	}{
+		{
+			handlers: []et.Handler{
+				func(_ context.Context, _ *et.Node, _ string) error {
+					return nil
+				},
+			},
+			isError: false,
+		},
+		{
+			handlers: []et.Handler{
+				func(_ context.Context, _ *et.Node, _ string) error {
+					return errors.New("handler error")
+				},
+			},
+			isError: true,
+		},
+	}
+
+	for _, s := range scenarios {
+		wrapper := et.NewTemplateWrapper(
+			template.New(name),
+			wrapLoader{},
+			s.handlers,
+			et.ReExtends("{{", "}}"),
+			et.ReTemplate("{{", "}}"),
+			"@main/global.html",
+		)
+
+		for range []struct{}{{}, {}} {
+			err := wrapper.Parse(context.TODO())
+
+			if s.isError {
+				assert.Error(t, err)
+			} else if assert.NoError(t, err) && assert.NotNil(t, wrapper.HTML) {
+				var out bytes.Buffer
+				if err = wrapper.HTML.ExecuteTemplate(&out, name, nil); assert.NoError(t, err) {
+					assert.Equal(t, htmlResult, out.String())
+				}
 			}
 		}
 	}
