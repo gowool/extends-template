@@ -5,11 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	et "github.com/gowool/extends-template"
-	"github.com/stretchr/testify/assert"
 	"html/template"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	et "github.com/gowool/extends-template"
 )
 
 const (

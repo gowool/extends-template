@@ -3,9 +3,9 @@ package et
 import (
 	"context"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"io/fs"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 )

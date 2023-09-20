@@ -2,11 +2,13 @@ package et_test
 
 import (
 	"context"
-	et "github.com/gowool/extends-template"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	et "github.com/gowool/extends-template"
 )
 
 func newFilesystemLoader() *et.FilesystemLoader {

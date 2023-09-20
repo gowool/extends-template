@@ -1,11 +1,8 @@
 module github.com/gowool/extends-template
 
-go 1.20
+go 1.21
 
-require (
-	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
-)
+require github.com/stretchr/testify v1.8.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

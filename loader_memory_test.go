@@ -2,10 +2,12 @@ package et_test
 
 import (
 	"context"
-	et "github.com/gowool/extends-template"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	et "github.com/gowool/extends-template"
 )
 
 var memData = map[string][]byte{

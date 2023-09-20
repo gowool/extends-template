@@ -3,9 +3,11 @@ package et_test
 import (
 	"context"
 	"errors"
-	et "github.com/gowool/extends-template"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	et "github.com/gowool/extends-template"
 )
 
 const (

@@ -17,22 +17,22 @@ const (
 )
 
 type Environment struct {
-	debug       bool
-	global      []string
-	left        string
-	right       string
-	loader      Loader
-	handlers    []Handler
-	reExtends   *regexp.Regexp
-	reTemplates *regexp.Regexp
-	templates   *sync.Map
-	funcMap     template.FuncMap
-	hash        atomic.Value
-	mu          sync.Mutex
+	debug      bool
+	global     []string
+	left       string
+	right      string
+	loader     Loader
+	handlers   []Handler
+	reExtends  *regexp.Regexp
+	reTemplate *regexp.Regexp
+	templates  *sync.Map
+	funcMap    template.FuncMap
+	hash       atomic.Value
+	mu         sync.Mutex
 }
 
 func NewEnvironment(loader Loader, handlers ...Handler) *Environment {
-	e := &Environment{loader: loader, handlers: handlers}
+	e := &Environment{loader: loader, handlers: handlers, funcMap: template.FuncMap{}}
 
 	return e.Delims(leftDelim, rightDelim)
 }
@@ -56,7 +56,7 @@ func (e *Environment) Delims(left, right string) *Environment {
 	e.left = left
 	e.right = right
 	e.reExtends = ReExtends(left, right)
-	e.reTemplates = ReTemplate(left, right)
+	e.reTemplate = ReTemplate(left, right)
 	e.updateHash()
 
 	return e
@@ -66,7 +66,6 @@ func (e *Environment) Funcs(funcMap template.FuncMap) *Environment {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	e.funcMap = template.FuncMap{}
 	for k, v := range funcMap {
 		e.funcMap[k] = v
 	}
@@ -95,7 +94,7 @@ func (e *Environment) NewTemplateWrapper(name string) *TemplateWrapper {
 		e.loader,
 		e.handlers,
 		e.reExtends,
-		e.reTemplates,
+		e.reTemplate,
 		e.global...,
 	)
 }

@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	et "github.com/gowool/extends-template"
 	"html/template"
 	"os"
 	"path/filepath"
+
+	et "github.com/gowool/extends-template"
 )
 
 func main() {

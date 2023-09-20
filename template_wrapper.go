@@ -2,9 +2,9 @@ package et
 
 import (
 	"context"
-	"golang.org/x/exp/slices"
 	"html/template"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -30,7 +30,7 @@ func NewTemplateWrapper(
 	loader Loader,
 	handlers []Handler,
 	reExtends *regexp.Regexp,
-	reTemplates *regexp.Regexp,
+	reTemplate *regexp.Regexp,
 	global ...string,
 ) *TemplateWrapper {
 	w := &TemplateWrapper{
@@ -38,7 +38,7 @@ func NewTemplateWrapper(
 		loader:      loader,
 		handlers:    handlers,
 		reExtends:   reExtends,
-		reTemplates: reTemplates,
+		reTemplates: reTemplate,
 		global:      global,
 	}
 
