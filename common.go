@@ -10,7 +10,7 @@ import (
 
 const (
 	extendsPattern  = `%s\s*extends\s*"(.*?)"\s*%s`
-	templatePattern = `%s\s*template\s*"(.*?)".*?%s`
+	templatePattern = `%s.*?template\s*"(.*?)".*?%s`
 )
 
 func ReExtends(left, right string) *regexp.Regexp {
