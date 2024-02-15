@@ -5,6 +5,8 @@ import (
 	"context"
 	"html/template"
 	"path"
+
+	"github.com/gowool/extends-template/internal"
 )
 
 type Handler func(ctx context.Context, node *Node, namespace string) error
@@ -52,20 +54,20 @@ func (n *Node) Init(ctx context.Context) (err error) {
 
 	if extends := n.w.reExtends.FindAllSubmatch(n.Source.Code, -1); len(extends) > 0 {
 		n.Source.Code = n.w.reExtends.ReplaceAll(n.Source.Code, []byte{})
-		if err = NewNode(toString(extends[0][1]), n.w, n).Init(ctx); err != nil {
+		if err = NewNode(internal.String(extends[0][1]), n.w, n).Init(ctx); err != nil {
 			return
 		}
 	}
 
 	if includes := n.w.reTemplates.FindAllSubmatch(n.Source.Code, -1); len(includes) > 0 {
 		for _, tpl := range includes {
-			include := NewNode(toString(tpl[1]), n.w, nil)
+			include := NewNode(internal.String(tpl[1]), n.w, nil)
 			if err = include.Init(ctx); err != nil {
 				return
 			}
 			n.Includes = append(n.Includes, include)
 			if n.w.ns != "" && '@' == n.w.ns[0] && '@' != rune(tpl[1][0]) {
-				n.Source.Code = bytes.Replace(n.Source.Code, tpl[1], append(toBytes(n.w.ns), tpl[1]...), 1)
+				n.Source.Code = bytes.Replace(n.Source.Code, tpl[1], append(internal.Bytes(n.w.ns), tpl[1]...), 1)
 			}
 		}
 	}
@@ -80,7 +82,7 @@ func (n *Node) Init(ctx context.Context) (err error) {
 }
 
 func (n *Node) Parse(t *template.Template) error {
-	if _, err := t.Parse(toString(n.Source.Code)); err != nil {
+	if _, err := t.Parse(internal.String(n.Source.Code)); err != nil {
 		return err
 	}
 

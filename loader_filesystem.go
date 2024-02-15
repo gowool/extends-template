@@ -2,6 +2,7 @@ package et
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -101,7 +102,7 @@ func (l *FilesystemLoader) SetPaths(namespace string, paths ...string) error {
 
 	var err error
 	for _, p := range paths {
-		err = merge(err, l.add(namespace, p))
+		err = errors.Join(err, l.add(namespace, p))
 	}
 	return err
 }
@@ -199,9 +200,9 @@ func (l *FilesystemLoader) path(p string) (string, error) {
 	p = strings.Trim(l.normalize(p), sep)
 
 	if stat, err := fs.Stat(l.fsys, p); err != nil {
-		return p, errorf(err, ErrDirNotExistsFormat, p)
+		return p, errors.Join(fmt.Errorf(ErrDirNotExistsFormat, p), err)
 	} else if !stat.IsDir() {
-		return p, errorf(nil, ErrDirNotExistsFormat, p)
+		return p, fmt.Errorf(ErrDirNotExistsFormat, p)
 	}
 
 	return p, nil

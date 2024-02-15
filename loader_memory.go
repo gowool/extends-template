@@ -2,6 +2,7 @@ package et
 
 import (
 	"context"
+	"fmt"
 	"sync"
 )
 
@@ -31,7 +32,7 @@ func (l *MemoryLoader) Get(_ context.Context, name string) (*Source, error) {
 	if code, ok := l.templates.Load(name); ok {
 		return &Source{Code: code.([]byte), Name: name}, nil
 	}
-	return nil, errorf(nil, ErrNotDefinedFormat, name)
+	return nil, fmt.Errorf(ErrNotDefinedFormat, name)
 }
 
 func (l *MemoryLoader) IsFresh(ctx context.Context, name string, _ int64) (bool, error) {
@@ -42,5 +43,5 @@ func (l *MemoryLoader) Exists(_ context.Context, name string) (bool, error) {
 	if _, ok := l.templates.Load(name); ok {
 		return true, nil
 	}
-	return false, errorf(nil, ErrNotDefinedFormat, name)
+	return false, fmt.Errorf(ErrNotDefinedFormat, name)
 }

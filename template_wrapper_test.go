@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	et "github.com/gowool/extends-template"
+	"github.com/gowool/extends-template/internal"
 )
 
 const (
@@ -83,8 +84,8 @@ func TestTemplateWrapper_IsFresh(t *testing.T) {
 			template.New(name),
 			wrapLoader{t: s.t},
 			s.handlers,
-			et.ReExtends("{{", "}}"),
-			et.ReTemplate("{{", "}}"))
+			internal.ReExtends("{{", "}}"),
+			internal.ReTemplate("{{", "}}"))
 
 		isFresh := wrapper.IsFresh(context.TODO())
 
@@ -122,8 +123,8 @@ func TestTemplateWrapper_Parse(t *testing.T) {
 			template.New(name),
 			wrapLoader{},
 			s.handlers,
-			et.ReExtends("{{", "}}"),
-			et.ReTemplate("{{", "}}"),
+			internal.ReExtends("{{", "}}"),
+			internal.ReTemplate("{{", "}}"),
 			"@main/global.html",
 		)
 

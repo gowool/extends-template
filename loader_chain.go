@@ -2,8 +2,11 @@ package et
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
+
+	"github.com/gowool/extends-template/internal"
 )
 
 var _ Loader = (*ChainLoader)(nil)
@@ -83,16 +86,16 @@ func (l *ChainLoader) loop(ctx context.Context, name string, fn func(loader Load
 
 	for _, loader := range l.loaders {
 		if ok, err1 := loader.Exists(ctx, name); !ok {
-			err = merge(err, err1)
+			err = errors.Join(err, err1)
 			continue
 		}
 
 		if r, err1 := fn(loader); err1 == nil {
 			return r, nil
 		} else {
-			err = merge(err, fmt.Errorf("[%s]: %w", typeName(loader), err1))
+			err = errors.Join(err, fmt.Errorf("[%s]: %w", internal.TypeName(loader), err1))
 		}
 	}
 
-	return nil, errorf(err, ErrNotDefinedFormat, name)
+	return nil, errors.Join(fmt.Errorf(ErrNotDefinedFormat, name), err)
 }

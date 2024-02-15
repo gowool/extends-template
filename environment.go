@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+
+	"github.com/gowool/extends-template/internal"
 )
 
 const (
@@ -55,8 +57,8 @@ func (e *Environment) Delims(left, right string) *Environment {
 
 	e.left = left
 	e.right = right
-	e.reExtends = ReExtends(left, right)
-	e.reTemplate = ReTemplate(left, right)
+	e.reExtends = internal.ReExtends(left, right)
+	e.reTemplate = internal.ReTemplate(left, right)
 	e.updateHash()
 
 	return e
@@ -137,10 +139,10 @@ func (e *Environment) updateHash() {
 		buf.WriteString(name)
 	}
 
-	e.hash.Store(hash(buf.Bytes()))
+	e.hash.Store(internal.Hash(buf.Bytes()))
 	e.templates = &sync.Map{}
 }
 
 func (e *Environment) key(name string) string {
-	return hash(toBytes(fmt.Sprintf("%s:%s", name, e.hash.Load())))
+	return internal.Hash(internal.Bytes(fmt.Sprintf("%s:%s", name, e.hash.Load())))
 }
