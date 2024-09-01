@@ -13,18 +13,15 @@ type MemoryLoader struct {
 }
 
 func NewMemoryLoader(templates map[string][]byte) *MemoryLoader {
-	l := &MemoryLoader{templates: new(sync.Map)}
-
+	t := new(sync.Map)
 	for name, code := range templates {
-		l.Add(name, code)
+		t.Store(name, code)
 	}
-
-	return l
+	return &MemoryLoader{templates: t}
 }
 
 func (l *MemoryLoader) Add(name string, code []byte) *MemoryLoader {
 	l.templates.Store(name, code)
-
 	return l
 }
 

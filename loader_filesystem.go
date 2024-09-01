@@ -11,13 +11,13 @@ import (
 	"sync"
 )
 
-var _ Loader = (*FilesystemLoader)(nil)
+var _ Loader = (*FileSystemLoader)(nil)
 
 const BaseNamespace = "base"
 
 var sep = fmt.Sprintf("%c", filepath.Separator)
 
-type FilesystemLoader struct {
+type FileSystemLoader struct {
 	fsys   fs.FS
 	paths  *sync.Map
 	errors *sync.Map
@@ -25,8 +25,29 @@ type FilesystemLoader struct {
 	mu     sync.Mutex
 }
 
-func NewFilesystemLoader(fsys fs.FS) *FilesystemLoader {
-	return &FilesystemLoader{
+func NewFSLoaderWithNS(fsys fs.FS) (*FileSystemLoader, error) {
+	entries, err := fs.ReadDir(fsys, ".")
+	if err != nil {
+		return nil, err
+	}
+
+	loader := NewFileSystemLoader(fsys)
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if err = loader.SetPaths(entry.Name(), entry.Name()); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return loader, nil
+}
+
+func NewFileSystemLoader(fsys fs.FS) *FileSystemLoader {
+	if fsys == nil {
+		panic("fs.FS is nil")
+	}
+
+	return &FileSystemLoader{
 		fsys:   fsys,
 		paths:  new(sync.Map),
 		errors: new(sync.Map),
@@ -34,7 +55,7 @@ func NewFilesystemLoader(fsys fs.FS) *FilesystemLoader {
 	}
 }
 
-func (l *FilesystemLoader) Namespaces() (namespaces []string) {
+func (l *FileSystemLoader) Namespaces() (namespaces []string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -45,25 +66,26 @@ func (l *FilesystemLoader) Namespaces() (namespaces []string) {
 	return
 }
 
-func (l *FilesystemLoader) Paths(namespace string) (paths []string) {
+func (l *FileSystemLoader) Paths(namespace string) (paths []string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	if data, ok := l.paths.Load(namespace); ok {
-		paths = append(make([]string, 0, len(data.([]string))), data.([]string)...)
+		paths = make([]string, len(data.([]string)))
+		copy(paths, data.([]string))
 	}
 	return
 }
 
-func (l *FilesystemLoader) BasePrepend(path string) error {
+func (l *FileSystemLoader) BasePrepend(path string) error {
 	return l.Prepend(BaseNamespace, path)
 }
 
-func (l *FilesystemLoader) BaseAppend(path string) error {
+func (l *FileSystemLoader) BaseAppend(path string) error {
 	return l.Append(BaseNamespace, path)
 }
 
-func (l *FilesystemLoader) Prepend(namespace, p string) (err error) {
+func (l *FileSystemLoader) Prepend(namespace, p string) (err error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -84,7 +106,7 @@ func (l *FilesystemLoader) Prepend(namespace, p string) (err error) {
 	return
 }
 
-func (l *FilesystemLoader) Append(namespace, p string) error {
+func (l *FileSystemLoader) Append(namespace, p string) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -93,7 +115,7 @@ func (l *FilesystemLoader) Append(namespace, p string) error {
 	return l.add(namespace, p)
 }
 
-func (l *FilesystemLoader) SetPaths(namespace string, paths ...string) error {
+func (l *FileSystemLoader) SetPaths(namespace string, paths ...string) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -107,7 +129,7 @@ func (l *FilesystemLoader) SetPaths(namespace string, paths ...string) error {
 	return err
 }
 
-func (l *FilesystemLoader) Get(_ context.Context, name string) (*Source, error) {
+func (l *FileSystemLoader) Get(_ context.Context, name string) (*Source, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -124,7 +146,7 @@ func (l *FilesystemLoader) Get(_ context.Context, name string) (*Source, error) 
 	return &Source{Name: name, Code: code, File: file}, nil
 }
 
-func (l *FilesystemLoader) IsFresh(_ context.Context, name string, t int64) (bool, error) {
+func (l *FileSystemLoader) IsFresh(_ context.Context, name string, t int64) (bool, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -140,7 +162,7 @@ func (l *FilesystemLoader) IsFresh(_ context.Context, name string, t int64) (boo
 	}
 }
 
-func (l *FilesystemLoader) Exists(_ context.Context, name string) (bool, error) {
+func (l *FileSystemLoader) Exists(_ context.Context, name string) (bool, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -148,7 +170,7 @@ func (l *FilesystemLoader) Exists(_ context.Context, name string) (bool, error) 
 	return err == nil, err
 }
 
-func (l *FilesystemLoader) find(name string) (string, error) {
+func (l *FileSystemLoader) find(name string) (string, error) {
 	if p, ok := l.cache.Load(name); ok {
 		return p.(string), nil
 	}
@@ -178,7 +200,7 @@ func (l *FilesystemLoader) find(name string) (string, error) {
 	return "", err
 }
 
-func (l *FilesystemLoader) add(namespace, p string) (err error) {
+func (l *FileSystemLoader) add(namespace, p string) (err error) {
 	if p, err = l.path(p); err != nil {
 		return
 	}
@@ -192,11 +214,11 @@ func (l *FilesystemLoader) add(namespace, p string) (err error) {
 	return
 }
 
-func (l *FilesystemLoader) normalize(s string) string {
+func (l *FileSystemLoader) normalize(s string) string {
 	return strings.ReplaceAll(s, "/", sep)
 }
 
-func (l *FilesystemLoader) path(p string) (string, error) {
+func (l *FileSystemLoader) path(p string) (string, error) {
 	p = strings.Trim(l.normalize(p), sep)
 
 	if stat, err := fs.Stat(l.fsys, p); err != nil {
@@ -208,14 +230,14 @@ func (l *FilesystemLoader) path(p string) (string, error) {
 	return p, nil
 }
 
-func (l *FilesystemLoader) parse(name string) (string, string) {
+func (l *FileSystemLoader) parse(name string) (string, string) {
 	if data := strings.SplitN(name, "/", 2); len(data) == 2 && '@' == data[0][0] {
 		return data[0][1:], data[1]
 	}
 	return BaseNamespace, name
 }
 
-func (l *FilesystemLoader) reset() {
+func (l *FileSystemLoader) reset() {
 	l.errors = new(sync.Map)
 	l.cache = new(sync.Map)
 }

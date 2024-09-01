@@ -11,8 +11,8 @@ import (
 	et "github.com/gowool/extends-template"
 )
 
-func newFilesystemLoader() *et.FilesystemLoader {
-	return et.NewFilesystemLoader(os.DirFS("./tests"))
+func newFilesystemLoader() *et.FileSystemLoader {
+	return et.NewFileSystemLoader(os.DirFS("./tests"))
 }
 
 func TestFilesystemLoader_Namespaces(t *testing.T) {

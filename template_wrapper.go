@@ -78,7 +78,7 @@ func (w *TemplateWrapper) Parse(ctx context.Context) (err error) {
 		return
 	}
 
-	w.names = &sync.Map{}
+	w.names = new(sync.Map)
 
 	node := NewNode(w.HTML.Name(), w, nil)
 	if err = node.Init(ctx); err != nil {

@@ -17,7 +17,7 @@ func main() {
 	println(p)
 
 	fsys := os.DirFS(p)
-	fsLoader := et.NewFilesystemLoader(fsys)
+	fsLoader := et.NewFileSystemLoader(fsys)
 
 	if err = fsLoader.SetPaths("test_ns", "main", "base"); err != nil {
 		panic(err)

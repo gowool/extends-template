@@ -80,7 +80,8 @@ func (e *Environment) Global(global ...string) *Environment {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	e.global = append(make([]string, 0, len(global)), global...)
+	e.global = make([]string, len(global))
+	copy(e.global, global)
 	e.updateHash()
 
 	return e
@@ -140,7 +141,7 @@ func (e *Environment) updateHash() {
 	}
 
 	e.hash.Store(internal.Hash(buf.Bytes()))
-	e.templates = &sync.Map{}
+	e.templates = new(sync.Map)
 }
 
 func (e *Environment) key(name string) string {
